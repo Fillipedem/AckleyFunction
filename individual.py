@@ -3,7 +3,7 @@ Class representing one individual(real-vectors)
 """
 from ackley import ackley
 from random import random, uniform
-from helper import pertubation
+from helper import perturbation
 
 class Individual:
     
@@ -17,7 +17,8 @@ class Individual:
         # initialize data
         self.values = []
         self.__initialize()
-        
+
+        self.std = [1.0]*30
         
     def fitness(self):
         return self.func(self.values)
@@ -25,21 +26,33 @@ class Individual:
     def __initialize(self):
         
         for j in range(self.dim):
-            y = random() * self.limits[j]
-        
+            a = random()
+            if a > 0.5:
+                y = random() * self.limits[j]
+            else:
+                y = - random() * self.limits[j]
+
             self.values.append(y)
        
     @staticmethod
-    def mutate(individual, std):
+    def mutate(individual):
         # Copy individual
         new = Individual(individual.dim, individual.func, individual.limits)
         new.values = individual.values[:]
-        
+
         # generate pertubation
-        pert = pertubation(new.dim, std)
-        
+        pert = perturbation(new.dim, individual.std)
+
         # sum
         for idx, val in enumerate(new.values):
-            new.values[idx] += pert[idx]
-        
+            p = pert[idx] + val
+
+            if p > 15:
+                p = 15.0
+
+            if p < -15:
+                p = -15.0
+
+            new.values[idx] = p
+
         return new

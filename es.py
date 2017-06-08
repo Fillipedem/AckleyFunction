@@ -8,7 +8,7 @@ import helper
 
 class ES:
     
-    def __init__(self, dim = 30, pop_size=50, limits=[1.0]*30, func=ackley, uncorrelated = True, one_step_size = True):
+    def __init__(self, dim = 30, pop_size=50, limits=[1.0]*30, func=ackley, uncorrelated=True, one_step_size=True):
         
         # Individual and search parameters
         self.dim = dim
@@ -18,15 +18,14 @@ class ES:
         
         # mutation parameters
         self.uncorrelated = uncorrelated
-        self.one_step_size =one_step_size
+        self.one_step_size = one_step_size
         self.c = 0.8
         
         # population
         self.population = []
         self.spring = []
         self.__initialize()
-        
-    
+
         # set new minimization function
         def set_function(self, func):
             self.func = func
@@ -50,7 +49,7 @@ class ES:
                 pop = []
                 for x in self.population:
                     pop.append(x[0])
-                
+
                 data[0].append(ite)
                 data[1].append(helper.med(pop))
                 data[2].append(helper.dev(pop))
@@ -65,7 +64,7 @@ class ES:
             
             # create offspring
             self.__make_offspring()
-            
+
             # survival selection
             self.__survival_selection()
             
@@ -75,17 +74,17 @@ class ES:
     # offspring
     def __make_offspring(self):
         #
-        num_childs = 200
+        num_child = 200
         
-        for i in range(num_childs):
+        for i in range(num_child):
             
             # random select parent
             parent = randint(0, self.dim - 1)
             
             # get parent data
-            individual, success, tries, std = self.population[parent]
+            individual, success, tries = self.population[parent]
             
-            new_individual = Individual.mutate(individual, std)
+            new_individual = Individual.mutate(individual)
             
             # check mutate success
             if individual.fitness() < new_individual.fitness():
@@ -93,10 +92,10 @@ class ES:
                 
             # update tries
             tries += 1
-            
-            # add new chidl
-            self.population.append((new_individual, success, tries, std))
-            
+
+            # add new child
+            self.population.append((new_individual, success, tries))
+
             
     # survival selection
     def __survival_selection(self):
@@ -110,18 +109,20 @@ class ES:
     def __update_std(self):
         
         for index, pop in enumerate(self.population):
-            individual, success, tries, std = pop
-            
-            new_std = std
+            individual, success, tries = pop
+
             if tries == 5:
-                
+
                 if success/tries > 1/5:
-                    std /= self.c
-                elif success/tries < 1/5:
-                    std *= self.c
-                    
+                    for idx, s in enumerate(individual.std):
+                        individual.std[idx] /= self.c
+
+                elif success/tries <= 1/5:
+                    for idx, s in enumerate(individual.std):
+                        individual.std[idx] *= self.c
+
                 # update
-                self.population[index] = individual, 0, 0, std
+                self.population[index] = individual, 0, 0
                     
     # initialize population
     def __initialize(self):
@@ -130,10 +131,10 @@ class ES:
         for i in range(self.pop_size):
             
             individual = Individual(self.dim, self.func, self.limits)
-            std = 1.0
-            success= 0
-            
-            el = (individual, success, 0, std)
-        
+
+            el = (individual, 0, 0)
+
             # append
             self.population.append(el)
+
+
