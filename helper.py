@@ -6,11 +6,10 @@ from statistics import variance, stdev, mean
 ## Plot Libraries
 import matplotlib.pyplot as plt
 import numpy as np
-
+from math import exp, sqrt
 
 def same(population):
     m = []
-
 
 def med(population):
     """
@@ -66,12 +65,39 @@ def plot(data, title):
 
     plt.show()
 
+def plot2(data, title):
+    """
+    plot results from a ES algorithm
+    """
+    plt.plot(data[0],  data[1], label='Média da População')
+    plt.plot(data[0], data[2], label='Desvio Padrão')
+    plt.plot(data[0], data[3], label='Variância')
+    plt.plot(data[0], data[4], label="Melhor Individuo")
+
+    plt.xlabel('Número de Interações')
+    plt.ylabel('Fitness')
+
+    plt.title(title)
+
+    plt.legend()
+
+    plt.show()
+
 
 def perturbation(dim, std):
     mu, sigma = 0, 1
     pert = [0.0]*dim
 
     for idx, s in enumerate(std):
-        pert[idx] = (np.random.normal(mu, sigma, 1))[0]
+        pert[idx] = s*(np.random.normal(mu, sigma, 1))[0]
 
     return pert
+
+def update_step(std):
+    mu, sigma = 0, 1
+    
+    
+    for idx, val in enumerate(std):
+        p = exp(1/sqrt(30)*(np.random.normal(mu, sigma, 1))[0])
+        
+        std[idx] = val*p

@@ -8,13 +8,15 @@ import helper
 
 class ES:
     
-    def __init__(self, dim = 30, pop_size=50, limits=[1.0]*30, func=ackley, uncorrelated=True, one_step_size=True):
+    def __init__(self, dim = 30, pop_size=50, limits=[1.0]*30, func=ackley, uncorrelated=True, one_step_size=True, mutation=True):
         
         # Individual and search parameters
         self.dim = dim
         self.pop_size = pop_size
         self.limits = limits
         self.func = ackley
+        self.mutation = mutation
+        self.one_step_size = one_step_size
         
         # mutation parameters
         self.uncorrelated = uncorrelated
@@ -23,7 +25,7 @@ class ES:
         
         # population
         self.population = []
-        self.spring = []
+        self.offspring = []
         self.__initialize()
 
         # set new minimization function
@@ -75,7 +77,7 @@ class ES:
     def __make_offspring(self):
         #
         num_child = 200
-        
+        self.offspring = []
         for i in range(num_child):
             
             # random select parent
@@ -94,36 +96,50 @@ class ES:
             tries += 1
 
             # add new child
-            self.population.append((new_individual, success, tries))
+            self.offspring.append((new_individual, success, tries))
 
             
     # survival selection
     def __survival_selection(self):
         
         # sorted by fitness
-        self.population.sort(key=lambda x: x[0].fitness())
+        self.offspring.sort(key=lambda x: x[0].fitness())
         
         # get the first self.dim
-        self.population = self.population[:self.dim]
+        self.population = self.offspring[:self.dim]
          
     def __update_std(self):
         
         for index, pop in enumerate(self.population):
-            individual, success, tries = pop
-
-            if tries == 5:
-
-                if success/tries > 1/5:
-                    for idx, s in enumerate(individual.std):
-                        individual.std[idx] /= self.c
-
-                elif success/tries <= 1/5:
-                    for idx, s in enumerate(individual.std):
-                        individual.std[idx] *= self.c
-
-                # update
-                self.population[index] = individual, 0, 0
+            
+            #self.__one_five(index, pop)
+            self.__uncorelated_update(index, pop)
                     
+                    
+    def __one_five(self, index, pop):
+        individual, success, tries = pop
+
+        if tries == 5:
+
+            if success/tries > 1/5:
+                for idx, s in enumerate(individual.std):
+                     individual.std[idx] /= self.c
+
+            elif success/tries <= 1/5:
+                for idx, s in enumerate(individual.std):
+                    individual.std[idx] *= self.c
+
+            # update
+            self.population[index] = individual, 0, 0
+    
+    
+    def __uncorelated_update(self, index, pop):
+    
+        individual, success, tries = pop
+    
+        helper.update_step(individual.std)
+        
+
     # initialize population
     def __initialize(self):
         

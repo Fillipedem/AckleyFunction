@@ -35,13 +35,23 @@ class Individual:
             self.values.append(y)
        
     @staticmethod
+    def recombine(first, second):
+        new = Individual(first.dim, first.func, first.limits)
+        
+        for i in range(first.dim):
+            new.values[i] = (first.values[i] + second.values[i])/2
+            
+        return new
+        
+    @staticmethod
     def mutate(individual):
         # Copy individual
         new = Individual(individual.dim, individual.func, individual.limits)
         new.values = individual.values[:]
+        new.std = individual.std[:]
 
         # generate pertubation
-        pert = perturbation(new.dim, individual.std)
+        pert = perturbation(new.dim, new.std)
 
         # sum
         for idx, val in enumerate(new.values):
