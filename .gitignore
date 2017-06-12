@@ -46,3 +46,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 __pycache__/ackley.cpython-36.pyc
+.idea/workspace.xml
+*.xml
+.idea/AckleyFunction.iml
+__pycache__/es.cpython-36.pyc
